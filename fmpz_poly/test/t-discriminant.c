@@ -118,6 +118,67 @@ main(void)
         fmpz_poly_clear(f);
     }
 
+    /* Print discriminant factors */
+    for (i = 0; i < 100000; i++)
+    {
+        fmpz_t a;
+        fmpz_poly_t f, g, h;
+        fmpz * fac;
+        slong i, * pow;
+        int yes = 0;
+
+        fmpz_init(a);
+        fmpz_poly_init(f);
+        fmpz_poly_init(g);
+        fmpz_poly_init(h);
+        
+        fmpz_poly_randtest(g, state, n_randint(state, 10), 20);
+        fmpz_poly_randtest(h, state, n_randint(state, 10), 20);
+
+        fmpz_poly_compose(f, g, h);
+
+        fac = _fmpz_vec_init(f->length);
+        pow = flint_calloc(f->length, sizeof(slong));
+
+        fmpz_poly_discriminant_factored(a, fac, pow, f);
+      
+        yes = 0;
+        for (i = 0; i < f->length; i++)
+        {
+           if ((pow[i] > 1L || pow[i] < -1L) && (fac[i] != 1L && fac[i] != -1L))
+           {
+              yes = 1;
+           }
+        }
+
+        if (yes) 
+        {
+           for (i = 0; i < f->length; i++)
+           {
+              if (pow[i] != 0)
+              {
+                 printf("* ");
+                 if (fmpz_sgn(fac + i) < 0)
+                    printf("(");
+                 fmpz_print(fac + i);
+                 if (fmpz_sgn(fac + i) < 0)
+                    printf(")");
+                 printf("^%ld ", pow[i]);
+              }
+           }
+
+           printf("\n");
+           fmpz_poly_print_pretty(f, "x"); printf("\n");
+           printf("disc = "); fmpz_print(a); printf("\n\n");
+        }
+
+        free(pow);
+        _fmpz_vec_clear(fac, f->length);
+        fmpz_clear(a);
+        fmpz_poly_clear(f);
+        fmpz_poly_clear(g);
+        fmpz_poly_clear(h);
+    }
     FLINT_TEST_CLEANUP(state);
     
     flint_printf("PASS\n");

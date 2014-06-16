@@ -29,6 +29,199 @@
 #include "fmpz_vec.h"
 #include "fmpz_poly.h"
 
+void __fac_set(slong * r, slong num, slong exp)
+{
+   slong i;
+   
+   for (i = 0; i < num; i++)
+      r[i] = 0;
+
+   r[i] = exp;
+}
+
+void __fac_pow_ui(slong * r, slong * a, slong num, slong exp)
+{
+   slong i;
+
+   for (i = 0; i < num; i++)
+      r[i] = exp*a[i];
+}
+
+void __fac_mul(slong * r, slong * a, slong * b, slong num)
+{
+   slong i;
+
+   for (i = 0; i < num; i++)
+      r[i] = a[i] + b[i];
+}
+
+void __fac_divexact(slong * r, slong * a, slong * b, slong num)
+{
+   slong i;
+
+   for (i = 0; i < num; i++)
+      r[i] = a[i] - b[i];
+}
+
+void __fac_check(slong * r, fmpz * fac, fmpz_t v, slong num, char * name)
+{
+   slong i;
+   fmpz_t t, u, pow;
+
+   fmpz_init_set_ui(t, 1);
+   fmpz_init_set_ui(u, 1);
+   fmpz_init(pow);
+
+   for (i = 0; i < num; i++)
+   {
+      if (r[i] > 0)
+      {
+         fmpz_pow_ui(pow, fac + i, r[i]);
+         fmpz_mul(t, t, pow);
+      }
+      if (r[i] < 0)
+      {
+         fmpz_pow_ui(pow, fac + i, -r[i]);
+         fmpz_mul(u, u, pow);
+      }
+   }
+
+   fmpz_divexact(t, t, u);
+
+   if (fmpz_cmpabs(t, v) != 0)
+   {
+      printf("%s: ", name); fmpz_print(v); printf(" != "); fmpz_print(t); printf("\n");
+      abort();
+   }
+
+   fmpz_clear(t);
+   fmpz_clear(u);
+   fmpz_clear(pow);
+}
+
+void
+_fmpz_poly_resultant_euclidean_factored(fmpz_t res, fmpz * fac, slong * pow,
+                                        const fmpz * poly1, slong len1, 
+                                        const fmpz * poly2, slong len2)
+{
+    if (len2 == 1)
+    {
+        fmpz_pow_ui(res, poly2, len1 - 1);
+    }
+    else
+    {
+        fmpz_t a, b, g, h, t;
+        fmpz *A, *B, *W;
+        slong *gfac, *hfac, *afac, *bfac;
+        const slong alloc = len1 + len2;
+        slong sgn = 1, num = 0;
+
+        fmpz_init(a);
+        fmpz_init(b);
+        fmpz_init(g);
+        fmpz_init(h);
+        fmpz_init(t);
+
+        A = W = _fmpz_vec_init(alloc);
+        B = W + len1;
+        gfac = flint_calloc(4*len1, sizeof(slong));
+        hfac = gfac + len1;
+        afac = hfac + len1;
+        bfac = afac + len1;
+
+        _fmpz_poly_content(a, poly1, len1);
+        _fmpz_poly_content(b, poly2, len2);
+        _fmpz_vec_scalar_divexact_fmpz(A, poly1, len1, a);
+        _fmpz_vec_scalar_divexact_fmpz(B, poly2, len2, b);
+
+        fmpz_one(g);
+        fmpz_one(h);
+
+        fmpz_pow_ui(a, a, len2 - 1);
+        fmpz_pow_ui(b, b, len1 - 1);
+        fmpz_mul(t, a, b);
+
+        do
+        {
+            const slong d = len1 - len2;
+
+            if (!(len1 & WORD(1)) & !(len2 & WORD(1)))
+                sgn = -sgn;
+
+            _fmpz_poly_pseudo_rem_cohen(A, A, len1, B, len2);
+
+            FMPZ_VEC_NORM(A, len1);
+
+            if (len1 == 0)
+            {
+                fmpz_zero(res);
+                goto cleanup;
+            }
+
+            {
+                fmpz * T;
+                slong len;
+                T = A, A = B, B = T;
+                len = len1, len1 = len2, len2 = len;
+            }
+
+            if (len1 - len2 > 1)
+               printf("%ld %ld\n", len1, len2);
+
+            fmpz_pow_ui(a, h, d);
+            __fac_pow_ui(afac, hfac, num, d);
+            __fac_check(afac, fac, a, num, "a");
+            fmpz_mul(b, g, a);
+            __fac_mul(bfac, gfac, afac, num);
+            __fac_check(bfac, fac, b, num, "b");
+            _fmpz_vec_scalar_divexact_fmpz(B, B, len2, b);
+
+            fmpz_pow_ui(g, A + (len1 - 1), d);
+            fmpz_set(fac + num, A + (len1 - 1));
+            __fac_set(gfac, num++, d);
+            __fac_check(gfac, fac, g, num, "g");
+            fmpz_mul(b, h, g);
+            __fac_mul(bfac, hfac, gfac, num);
+            __fac_check(bfac, fac, b, num, "b2");
+            fmpz_divexact(h, b, a);
+            __fac_divexact(hfac, bfac, afac, num);
+            __fac_check(hfac, fac, h, num, "h");
+            fmpz_set(g, A + (len1 - 1));
+            __fac_set(gfac, num - 1, 1);
+            __fac_check(gfac, fac, g, num, "g2");
+        } while (len2 > 1);
+
+        fmpz_pow_ui(g, h, len1 - 1);
+        __fac_pow_ui(gfac, hfac, num, len1 - 1);
+        __fac_check(gfac, fac, g, num, "g3");
+        fmpz_pow_ui(b, B + (len2 - 1), len1 - 1);
+        fmpz_set(fac + num, B + (len2 - 1));
+        __fac_set(bfac, num++, len1 - 1);
+        __fac_check(bfac, fac, b, num, "b3");
+        fmpz_mul(a, h, b);
+        __fac_mul(afac, hfac, bfac, num);
+        __fac_check(afac, fac, a, num, "a2");
+        fmpz_divexact(h, a, g);
+        __fac_divexact(pow, afac, gfac, num);
+        __fac_check(pow, fac, h, num, "pow");
+               
+        fmpz_mul(res, t, h);
+        if (sgn < 0)
+            fmpz_neg(res, res);
+
+      cleanup:
+
+        fmpz_clear(a);
+        fmpz_clear(b);
+        fmpz_clear(g);
+        fmpz_clear(h);
+        fmpz_clear(t);
+        free(gfac);
+        
+        _fmpz_vec_clear(W, alloc);
+    }
+}
+
 void
 _fmpz_poly_resultant_euclidean(fmpz_t res, const fmpz * poly1, slong len1, 
                                  const fmpz * poly2, slong len2)
@@ -142,3 +335,27 @@ fmpz_poly_resultant_euclidean(fmpz_t res, const fmpz_poly_t poly1,
             fmpz_neg(res, res);
     }
 }
+
+void fmpz_poly_resultant_euclidean_factored(fmpz_t res, fmpz * fac, slong * pow,
+                                   const fmpz_poly_t poly1, const fmpz_poly_t poly2)
+{
+    const slong len1 = poly1->length, len2 = poly2->length;
+
+    if (len1 == 0 || len2 == 0)
+    {
+        fmpz_zero(res);
+        return;
+    }
+
+    if (len1 >= len2)
+        _fmpz_poly_resultant_euclidean_factored(res, fac, pow, poly1->coeffs, 
+                                                          len1, poly2->coeffs, len2);
+    else
+    {
+        _fmpz_poly_resultant_euclidean_factored(res, fac, pow, poly2->coeffs, len2, 
+                                                                poly1->coeffs, len1);
+        if ((len1 > 1) && (!(len1 & WORD(1)) & !(len2 & WORD(1))))
+            fmpz_neg(res, res);
+    }
+}
+                                       

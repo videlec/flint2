@@ -596,6 +596,13 @@ void _fmpz_poly_resultant(fmpz_t res, const fmpz * poly1, slong len1,
 void fmpz_poly_resultant(fmpz_t res, const fmpz_poly_t poly1,
                                                       const fmpz_poly_t poly2);
 
+void _fmpz_poly_resultant_euclidean_factored(fmpz_t res, fmpz * fac, 
+                              slong * pow, const fmpz * poly1, slong len1, 
+                                               const fmpz * poly2, slong len2);
+
+void fmpz_poly_resultant_euclidean_factored(fmpz_t res, fmpz * fac, slong * pow,
+                             const fmpz_poly_t poly1, const fmpz_poly_t poly2);
+
 void _fmpz_poly_xgcd_modular(fmpz_t r, fmpz * s, fmpz * t, 
                const fmpz * poly1, slong len1, const fmpz * poly2, slong len2);
 
@@ -621,6 +628,12 @@ void fmpz_poly_xgcd(fmpz_t r, fmpz_poly_t s, fmpz_poly_t t,
 void _fmpz_poly_discriminant(fmpz_t res, const fmpz * poly, slong len);
 
 void fmpz_poly_discriminant(fmpz_t res, const fmpz_poly_t poly);
+
+void _fmpz_poly_discriminant_factored(fmpz_t res, fmpz * fac, slong * pow,
+                                                 const fmpz * poly, slong len);
+
+void fmpz_poly_discriminant_factored(fmpz_t res, fmpz * fac, 
+                                           slong * pow, const fmpz_poly_t poly);
 
 /*  Gaussian content  ********************************************************/
 
