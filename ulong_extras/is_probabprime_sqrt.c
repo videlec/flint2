@@ -21,6 +21,8 @@
 
     Copyright (C) 2009 William Hart
     Copyright (C) 2011 Sebastian Pancratz
+    Copyright (C) 2014 Dana Jacobsen
+    Copyright (C) 2014 William Hart
 
 ******************************************************************************/
 
