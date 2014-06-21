@@ -296,6 +296,8 @@ int n_is_strong_probabprime_precomp(mp_limb_t n,
 int n_is_strong_probabprime2_preinv(mp_limb_t n, 
                            mp_limb_t ninv, mp_limb_t a, mp_limb_t d);
 
+int n_is_probabprime_sqrt(ulong n);
+
 int n_is_probabprime(mp_limb_t n);
 
 int n_is_prime_pseudosquare(mp_limb_t n);
