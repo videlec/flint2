@@ -46,9 +46,13 @@ int main(void)
       while ((t & 1) == 0)
          t >>= 1;
 
-      if (!n_is_prime(n) && (n % 3) == 0 
+      if (!n_is_prime(n) && (n % 3) == 1 && (n % 5) != 0 && (n % 7) != 0
          && n_is_strong_probabprime2_preinv(n, ninv, 2, t)
-         && n_is_strong_probabprime_cubic2_preinv(n, ninv, 3))
+         && n_is_strong_probabprime2_preinv(n, ninv, 3, t)
+         && n_is_strong_probabprime2_preinv(n, ninv, 5, t)
+         && n_is_strong_probabprime_cubic2_preinv(n, ninv, 7))
+         /* && n_is_strong_probabprime_cubic2_preinv(n, ninv, 7) */
+         /* && n_is_strong_probabprime2_preinv(n, ninv, 2, t) */
       {
          printf("%lu is declared prime\n", n);
       }
