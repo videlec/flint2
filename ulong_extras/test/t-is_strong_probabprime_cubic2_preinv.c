@@ -29,35 +29,34 @@
 #include "flint.h"
 #include "ulong_extras.h"
 
-int main(void)
+int main(int argc, char **argv)
 {
-   long result;
-   mp_limb_t n, ninv, t;
+   long s1, s2;
+   mp_limb_t n, ninv;
    FLINT_TEST_INIT(state);
    
    flint_printf("is_strong_probabprime_cubic2_preinv....");
    fflush(stdout);
+
+   s1 = atol(argv[1]) | 1;
+   s2 = atol(argv[2]);
    
-   for (n = 3UL; n < 1000000000000L; n+=2) /* Test that primes pass the test */
+   printf("%ld %ld\n", s1, s2);
+
+   for (n = s1; n < s2; n+=2) /* Test that primes pass the test */
    {
       ninv = n_preinvert_limb(n);
       
-      t = n - 1;
-      while ((t & 1) == 0)
-         t >>= 1;
-
-      if (!n_is_prime(n) && (n % 3) == 1 && (n % 5) != 0 && (n % 7) != 0
-         && n_is_strong_probabprime2_preinv(n, ninv, 2, t)
-         && n_is_strong_probabprime2_preinv(n, ninv, 3, t)
-         && n_is_strong_probabprime2_preinv(n, ninv, 5, t)
+      if (!n_is_prime(n) && (n % 3) != 0 && (n % 5) != 0 && (n % 7) != 0
+         && n_is_strong_probabprime_cubic2_preinv(n, ninv, 2)
+         && n_is_strong_probabprime_cubic2_preinv(n, ninv, 3)
+         && n_is_strong_probabprime_cubic2_preinv(n, ninv, 5)
          && n_is_strong_probabprime_cubic2_preinv(n, ninv, 7))
-         /* && n_is_strong_probabprime_cubic2_preinv(n, ninv, 7) */
-         /* && n_is_strong_probabprime2_preinv(n, ninv, 2, t) */
       {
          printf("%lu is declared prime\n", n);
       }
 
-      if ((n & 16777215) == 0 || ((n + 1) & 16777215) == 0)
+      if ((n & 268435455) == 0 || ((n + 1) & 268435455) == 0)
          printf("n = %ld\n", n);
    }
 
