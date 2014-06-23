@@ -31,34 +31,38 @@
 
 int main(int argc, char **argv)
 {
-   long s1, s2;
-   mp_limb_t n, ninv;
+   mp_limb_t n, ninv, t;
+   FILE * file;
+   char str[100];
    FLINT_TEST_INIT(state);
-   
+
    flint_printf("is_strong_probabprime_cubic2_preinv....");
    fflush(stdout);
 
-   s1 = atol(argv[1]) | 1;
-   s2 = atol(argv[2]);
-   
-   printf("%ld %ld\n", s1, s2);
-
-   for (n = s1; n < s2; n+=2) /* Test that primes pass the test */
-   {
+   file = fopen("psps-below-2-to-64.txt", "r");
+      
+   while (fscanf(file, "%s\n", str) != EOF)
+   {      
+      n = atol(str);
+         
       ninv = n_preinvert_limb(n);
       
-      if (!n_is_prime(n) && (n % 3) != 0 && (n % 5) != 0 && (n % 7) != 0
+      t = n - 1;
+      
+      while ((t & 1) == 0)
+         t >>= 1;
+      
+      if (!n_is_prime(n) && (n % 1215) != 0 && (n % 34862) != 0 && (n % 574237825) != 0
          && n_is_strong_probabprime_cubic2_preinv(n, ninv, 2)
-         && n_is_strong_probabprime_cubic2_preinv(n, ninv, 3)
-         && n_is_strong_probabprime_cubic2_preinv(n, ninv, 5)
-         && n_is_strong_probabprime_cubic2_preinv(n, ninv, 7))
+         && n_is_strong_probabprime_cubic2_preinv(n, ninv, 1215)
+         && n_is_strong_probabprime_cubic2_preinv(n, ninv, 34862)
+         && n_is_strong_probabprime_cubic2_preinv(n, ninv, 574237825))
       {
          printf("%lu is declared prime\n", n);
       }
-
-      if ((n & 268435455) == 0 || ((n + 1) & 268435455) == 0)
-         printf("n = %ld\n", n);
    }
+
+   fclose(file);
 
    FLINT_TEST_CLEANUP(state);
    

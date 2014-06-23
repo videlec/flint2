@@ -40,6 +40,9 @@ int n_is_strong_probabprime_cubic2_preinv(mp_limb_t n, mp_limb_t ninv, mp_limb_t
     if (n <= 1)
        return 0;
     
+    if (a >= n)
+       a = n_mod2_preinv(a, n, ninv);
+
     t2 = n - 1;
 
     i2 = i3 = 0;
