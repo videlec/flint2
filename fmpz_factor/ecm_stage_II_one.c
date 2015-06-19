@@ -53,6 +53,7 @@ fmpz_factor_ecm_stage_II_one(fmpz_t f, mp_limb_t B1, mp_limb_t B2, mp_limb_t P,
     fmpz_init(Rz);
     fmpz_init(a);
     fmpz_init(b);
+    fmpz_init(tim);
 
     fmpz_init_set_ui(g, 1);
 
