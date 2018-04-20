@@ -18,16 +18,16 @@ mkdir -p local
 
 cd mpir-2.7.2
 ./configure ABI=$ABI --enable-gmpcompat --prefix=$(absolute_path "../local")
-${MAKE}  > /dev/null 2>&1
-${MAKE} install  > /dev/null 2>&1
+${MAKE} > /dev/null 2>&1
+${MAKE} install > /dev/null 2>&1
 
 cd ..
 wget http://www.mpfr.org/mpfr-4.0.0/mpfr-4.0.0.tar.bz2
 tar -xf mpfr-4.0.0.tar.bz2
 cd mpfr-4.0.0
 ./configure ABI=$ABI --with-gmp=$(absolute_path "../local") --prefix=$(absolute_path "../local")
-${MAKE}  > /dev/null 2>&1
-${MAKE} install  > /dev/null 2>&1
+${MAKE} > /dev/null 2>&1
+${MAKE} install > /dev/null 2>&1
 cd ..
  
 echo "int flint_test_multiplier(){return 1;}" > test_helpers.c
