@@ -211,8 +211,8 @@ install: library
 	cp flintxx/*.h "$(DESTDIR)$(PREFIX)/include/flint/flintxx"
 	cp *xx.h "$(DESTDIR)$(PREFIX)/include/flint"
 	if [[ "$(OS)" = "Darwin" ]]; then \
-        install_name_tool -id "$(DESTDIR)$(PREFIX)/$(LIBDIR)/$(FLINT_LIB)" "$(DESTDIR)$(PREFIX)/$(LIBDIR)/$(FLINT_LIBNAME)"; \
-    fi
+    		install_name_tool -id "$(DESTDIR)$(PREFIX)/$(LIBDIR)/$(FLINT_LIB)" "$(DESTDIR)$(PREFIX)/$(LIBDIR)/$(FLINT_LIBNAME)"; \
+	fi
 
 build:
 	mkdir -p build
